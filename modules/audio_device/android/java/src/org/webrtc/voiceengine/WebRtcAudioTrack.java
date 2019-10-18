@@ -256,6 +256,18 @@ public class WebRtcAudioTrack {
       return false;
     }
 
+    // The default (preferred) stream type is STREAM_VOICE_CALL since the
+    // WebRTC stack is mainly intended for VoIP calls.
+    int streamType = AudioManager.STREAM_VOICE_CALL;
+    if (audioManager.getMode() != AudioManager.MODE_IN_COMMUNICATION) {
+      // But if the user wants to run in another mode than COMM mode, we
+      // accept it and change the stream type to STREAM_MUSIC instead. It can
+      // e.g. be suitable for applications that do not record audio or if a
+      // call shall be casted to a Chromecast device.
+      streamType = AudioManager.STREAM_MUSIC;
+      Logging.w(TAG, "Using AudioManager.STREAM_MUSIC as stream type.");
+    }
+
     // Ensure that prevision audio session was stopped correctly before trying
     // to create a new AudioTrack.
     if (audioTrack != null) {
@@ -273,11 +285,11 @@ public class WebRtcAudioTrack {
         // and to allow certain platforms or routing policies to use this information for more
         // refined volume or routing decisions.
         audioTrack = createAudioTrackOnLollipopOrHigher(
-            sampleRate, channelConfig, minBufferSizeInBytes);
+            sampleRate, channelConfig, minBufferSizeInBytes, streamType);
       } else {
         // Use default constructor for API levels below 21.
         audioTrack =
-            createAudioTrackOnLowerThanLollipop(sampleRate, channelConfig, minBufferSizeInBytes);
+            createAudioTrackOnLowerThanLollipop(sampleRate, channelConfig, minBufferSizeInBytes, streamType);
       }
     } catch (IllegalArgumentException e) {
       reportWebRtcAudioTrackInitError(e.getMessage());
@@ -401,7 +413,7 @@ public class WebRtcAudioTrack {
   // refined volume or routing decisions.
   @TargetApi(21)
   private static AudioTrack createAudioTrackOnLollipopOrHigher(
-      int sampleRateInHz, int channelConfig, int bufferSizeInBytes) {
+      int sampleRateInHz, int channelConfig, int bufferSizeInBytes, int streamType) {
     Logging.d(TAG, "createAudioTrackOnLollipopOrHigher");
     // TODO(henrika): use setPerformanceMode(int) with PERFORMANCE_MODE_LOW_LATENCY to control
     // performance when Android O is supported. Add some logging in the mean time.
@@ -415,11 +427,26 @@ public class WebRtcAudioTrack {
       Logging.w(TAG, "A non default usage attribute is used: " + usageAttribute);
     }
     // Create an audio track where the audio usage is for VoIP and the content type is speech.
-    return new AudioTrack(
+    if(streamType == AudioManager.STREAM_MUSIC) {
+      return new AudioTrack(
+        new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build(),
+        new AudioFormat.Builder()
+          .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+          .setSampleRate(sampleRateInHz)
+          .setChannelMask(channelConfig)
+          .build(),
+        bufferSizeInBytes,
+        AudioTrack.MODE_STREAM,
+        AudioManager.AUDIO_SESSION_ID_GENERATE); 
+    } else {
+      return new AudioTrack(
         new AudioAttributes.Builder()
             .setUsage(usageAttribute)
             .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-        .build(),
+            .build(),
         new AudioFormat.Builder()
           .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
           .setSampleRate(sampleRateInHz)
@@ -428,12 +455,13 @@ public class WebRtcAudioTrack {
         bufferSizeInBytes,
         AudioTrack.MODE_STREAM,
         AudioManager.AUDIO_SESSION_ID_GENERATE);
+    }
   }
 
   @SuppressWarnings("deprecation") // Deprecated in API level 25.
   private static AudioTrack createAudioTrackOnLowerThanLollipop(
-      int sampleRateInHz, int channelConfig, int bufferSizeInBytes) {
-    return new AudioTrack(AudioManager.STREAM_VOICE_CALL, sampleRateInHz, channelConfig,
+      int sampleRateInHz, int channelConfig, int bufferSizeInBytes, int streamType) {
+    return new AudioTrack(streamType, sampleRateInHz, channelConfig,
         AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes, AudioTrack.MODE_STREAM);
   }
 
