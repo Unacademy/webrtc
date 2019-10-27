@@ -426,14 +426,14 @@ public class WebRtcAudioTrack {
           .setChannelMask(channelConfig)
           .build(),
         bufferSizeInBytes,
-        AudioTrack.MODE_STREAM,
+        AudioManager.MODE_IN_COMMUNICATION,
         AudioManager.AUDIO_SESSION_ID_GENERATE);
   }
 
   @SuppressWarnings("deprecation") // Deprecated in API level 25.
   private static AudioTrack createAudioTrackOnLowerThanLollipop(
       int sampleRateInHz, int channelConfig, int bufferSizeInBytes) {
-    return new AudioTrack(AudioManager.STREAM_VOICE_CALL, sampleRateInHz, channelConfig,
+    return new AudioTrack(AudioManager.MODE_IN_COMMUNICATION, sampleRateInHz, channelConfig,
         AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes, AudioTrack.MODE_STREAM);
   }
 
