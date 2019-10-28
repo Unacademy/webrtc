@@ -71,7 +71,7 @@ public class WebRtcAudioTrack {
 
   @TargetApi(21)
   private static int getDefaultUsageAttributeOnLollipopOrHigher() {
-    return AudioAttributes.USAGE_VOICE_COMMUNICATION;
+    return AudioAttributes.USAGE_MEDIA;
   }
 
   private final long nativeAudioTrack;
@@ -354,7 +354,7 @@ public class WebRtcAudioTrack {
     threadChecker.checkIsOnValidThread();
     Logging.d(TAG, "getStreamMaxVolume");
     assertTrue(audioManager != null);
-    return audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);
+    return audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
   }
 
   // Set current volume level for a phone call audio stream.
@@ -366,7 +366,7 @@ public class WebRtcAudioTrack {
       Logging.e(TAG, "The device implements a fixed volume policy.");
       return false;
     }
-    audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL, volume, 0);
+    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
     return true;
   }
 
@@ -384,7 +384,7 @@ public class WebRtcAudioTrack {
     threadChecker.checkIsOnValidThread();
     Logging.d(TAG, "getStreamVolume");
     assertTrue(audioManager != null);
-    return audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL);
+    return audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
   }
 
   private void logMainParameters() {
@@ -406,7 +406,7 @@ public class WebRtcAudioTrack {
     // TODO(henrika): use setPerformanceMode(int) with PERFORMANCE_MODE_LOW_LATENCY to control
     // performance when Android O is supported. Add some logging in the mean time.
     final int nativeOutputSampleRate =
-        AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_VOICE_CALL);
+        AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
     Logging.d(TAG, "nativeOutputSampleRate: " + nativeOutputSampleRate);
     if (sampleRateInHz != nativeOutputSampleRate) {
       Logging.w(TAG, "Unable to use fast mode since requested sample rate is not native");
@@ -417,8 +417,8 @@ public class WebRtcAudioTrack {
     // Create an audio track where the audio usage is for VoIP and the content type is speech.
     return new AudioTrack(
         new AudioAttributes.Builder()
-            .setUsage(usageAttribute)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
         .build(),
         new AudioFormat.Builder()
           .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
@@ -426,14 +426,14 @@ public class WebRtcAudioTrack {
           .setChannelMask(channelConfig)
           .build(),
         bufferSizeInBytes,
-        AudioManager.MODE_IN_COMMUNICATION,
+        AudioManager.MODE_STREAM,
         AudioManager.AUDIO_SESSION_ID_GENERATE);
   }
 
   @SuppressWarnings("deprecation") // Deprecated in API level 25.
   private static AudioTrack createAudioTrackOnLowerThanLollipop(
       int sampleRateInHz, int channelConfig, int bufferSizeInBytes) {
-    return new AudioTrack(AudioManager.MODE_IN_COMMUNICATION, sampleRateInHz, channelConfig,
+    return new AudioTrack(AudioManager.STREAM_MUSIC, sampleRateInHz, channelConfig,
         AudioFormat.ENCODING_PCM_16BIT, bufferSizeInBytes, AudioTrack.MODE_STREAM);
   }
 
