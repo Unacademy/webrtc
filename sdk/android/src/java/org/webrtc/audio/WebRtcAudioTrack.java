@@ -384,7 +384,7 @@ class WebRtcAudioTrack {
     }
     // Create an audio track where the audio usage is for VoIP and the content type is speech.
     return new AudioTrack(new AudioAttributes.Builder()
-                              .setUsage(USAGE_MEDIA)
+                              .setUsage(AudioAttributes.USAGE_MEDIA)
                               .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                               .build(),
         new AudioFormat.Builder()

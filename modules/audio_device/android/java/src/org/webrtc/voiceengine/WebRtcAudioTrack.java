@@ -426,7 +426,7 @@ public class WebRtcAudioTrack {
           .setChannelMask(channelConfig)
           .build(),
         bufferSizeInBytes,
-        AudioManager.MODE_STREAM,
+        AudioTrack.MODE_STREAM,
         AudioManager.AUDIO_SESSION_ID_GENERATE);
   }
 
