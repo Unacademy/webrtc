@@ -19,9 +19,11 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLExt;
 import android.opengl.EGLSurface;
 import android.os.Build;
-import javax.annotation.Nullable;
 import android.view.Surface;
+
 import org.webrtc.EglBase;
+
+import javax.annotation.Nullable;
 
 /**
  * Holds EGL state and utility methods for handling an EGL14 EGLContext, an EGLDisplay,
@@ -96,11 +98,11 @@ class EglBase14 implements EglBase {
     //added for testing purpose
     throw new RuntimeException(
             "Failed to create window surface: 0x0x3004");
-    eglSurface = EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, surface, surfaceAttribs, 0);
-    if (eglSurface == EGL14.EGL_NO_SURFACE) {
-      throw new RuntimeException(
-          "Failed to create window surface: 0x" + Integer.toHexString(EGL14.eglGetError()));
-    }
+//    eglSurface = EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, surface, surfaceAttribs, 0);
+//    if (eglSurface == EGL14.EGL_NO_SURFACE) {
+//      throw new RuntimeException(
+//          "Failed to create window surface: 0x" + Integer.toHexString(EGL14.eglGetError()));
+//    }
   }
 
   @Override
