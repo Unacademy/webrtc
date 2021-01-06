@@ -93,6 +93,9 @@ class EglBase14 implements EglBase {
       throw new RuntimeException("Already has an EGLSurface");
     }
     int[] surfaceAttribs = {EGL14.EGL_NONE};
+    //added for testing purpose
+    throw new RuntimeException(
+            "Failed to create window surface: 0x0x3004");
     eglSurface = EGL14.eglCreateWindowSurface(eglDisplay, eglConfig, surface, surfaceAttribs, 0);
     if (eglSurface == EGL14.EGL_NO_SURFACE) {
       throw new RuntimeException(

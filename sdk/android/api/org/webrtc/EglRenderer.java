@@ -64,17 +64,25 @@ public class EglRenderer implements VideoSink {
     // TODO(bugs.webrtc.org/8491): Remove NoSynchronizedMethodCheck suppression.
     @SuppressWarnings("NoSynchronizedMethodCheck")
     public synchronized void run() {
-      if (surface != null && eglBase != null && !eglBase.hasSurface()) {
-        if (surface instanceof Surface) {
-          eglBase.createSurface((Surface) surface);
-        } else if (surface instanceof SurfaceTexture) {
-          eglBase.createSurface((SurfaceTexture) surface);
-        } else {
-          throw new IllegalStateException("Invalid surface: " + surface);
+      try {
+        if (surface != null && eglBase != null && !eglBase.hasSurface()) {
+          if (surface instanceof Surface) {
+            eglBase.createSurface((Surface) surface);
+          } else if (surface instanceof SurfaceTexture) {
+            eglBase.createSurface((SurfaceTexture) surface);
+          } else {
+            throw new IllegalStateException("Invalid surface: " + surface);
+          }
+          eglBase.makeCurrent();
+          // Necessary for YUV frames with odd width.
+          GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
         }
-        eglBase.makeCurrent();
-        // Necessary for YUV frames with odd width.
-        GLES20.glPixelStorei(GLES20.GL_UNPACK_ALIGNMENT, 1);
+      } catch (Exception e) {
+        if (eglError != null) {
+          eglError.onSurfaceCreationFailed(e);
+        } else {
+          throw e;
+        }
       }
     }
   }
@@ -99,6 +107,7 @@ public class EglRenderer implements VideoSink {
   // EGL and GL resources for drawing YUV/OES textures. After initilization, these are only accessed
   // from the render thread.
   @Nullable private EglBase eglBase;
+  private EglError eglError;
   private final VideoFrameDrawer frameDrawer = new VideoFrameDrawer();
   @Nullable private RendererCommon.GlDrawer drawer;
   private final Matrix drawMatrix = new Matrix();
@@ -155,6 +164,11 @@ public class EglRenderer implements VideoSink {
    */
   public EglRenderer(String name) {
     this.name = name;
+  }
+
+  public EglRenderer(String name, EglError eglError) {
+    this.name = name;
+    this.eglError = eglError;
   }
 
   /**
