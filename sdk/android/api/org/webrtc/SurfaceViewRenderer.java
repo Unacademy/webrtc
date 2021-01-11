@@ -52,6 +52,14 @@ public class SurfaceViewRenderer extends SurfaceView
     getHolder().addCallback(eglRenderer);
   }
 
+  public SurfaceViewRenderer(Context context, EglError eglError) {
+    super(context);
+    this.resourceName = getResourceName();
+    eglRenderer = new SurfaceEglRenderer(resourceName, eglError);
+    getHolder().addCallback(this);
+    getHolder().addCallback(eglRenderer);
+  }
+
   /**
    * Standard View constructor. In order to render something, you must first call init().
    */

@@ -843,6 +843,7 @@ generate_jni("generated_java_audio_jni") {
 
 rtc_android_library("video_java") {
   java_files = [
+    "api/org/webrtc/EglError.java",
     "api/org/webrtc/EglRenderer.java",
     "api/org/webrtc/GlRectDrawer.java",
     "api/org/webrtc/VideoDecoderFallback.java",
